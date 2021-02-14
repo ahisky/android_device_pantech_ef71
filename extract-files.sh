@@ -1,14 +1,27 @@
 #!/bin/bash
 #
 # Copyright (C) 2016 The CyanogenMod Project
-# Copyright (C) 2018-2020 The LineageOS Project
+# Copyright (C) 2017-2019 The LineageOS Project
 #
-# SPDX-License-Identifier: Apache-2.0
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
 set -e
 
-# Load extract_utils and do some sanity checks
+DEVICE=land
+VENDOR=xiaomi
+
+# Load extractutils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "${MY_DIR}" ]]; then MY_DIR="${PWD}"; fi
 
@@ -22,21 +35,13 @@ fi
 source "${HELPER}"
 
 # Default to sanitizing the vendor folder before extraction
-CLEAN_VENDOR=false
+CLEAN_VENDOR=true
 
-ONLY_COMMON=
-ONLY_TARGET=
 SECTION=
 KANG=
 
 while [ "${#}" -gt 0 ]; do
     case "${1}" in
-        --only-common )
-                ONLY_COMMON=true
-                ;;
-        --only-target )
-                ONLY_TARGET=true
-                ;;
         -n | --no-cleanup )
                 CLEAN_VENDOR=false
                 ;;
@@ -58,27 +63,53 @@ if [ -z "${SRC}" ]; then
     SRC="adb"
 fi
 
-if [ -z "${ONLY_TARGET}" ]; then
-    # Initialize the helper for common device
-    setup_vendor "${DEVICE_COMMON}" "${VENDOR}" "${LINEAGE_ROOT}" true "${CLEAN_VENDOR}"
+function blob_fixup() {
+    case "${1}" in
 
-    extract "${MY_DIR}/proprietary-files-qc.txt" "${SRC}" \
-            "${KANG}" --section "${SECTION}"
-fi
+    vendor/bin/gx_fpcmd|vendor/bin/gx_fpd)
+        patchelf --remove-needed "libbacktrace.so" "${2}"
+        patchelf --remove-needed "libunwind.so" "${2}"
+        ;;
+    
+    vendor/bin/gx_fpd)
+        patchelf --add-needed "liblog.so" "${2}"
+        ;;
 
-if [ -z "${ONLY_COMMON}" ] && [ -s "${MY_DIR}/../${DEVICE}/proprietary-files.txt" ]; then
-    # Reinitialize the helper for device
-    source "${MY_DIR}/../${DEVICE}/extract-files.sh"
-    setup_vendor "${DEVICE}" "${VENDOR}" "${LINEAGE_ROOT}" false "${CLEAN_VENDOR}"
+    vendor/lib64/hw/fingerprint.goodix.so)
+        patchelf --remove-needed "libandroid_runtime.so" "${2}"
+        ;;
 
-    extract "${MY_DIR}/../${DEVICE}/proprietary-files.txt" "${SRC}" \
-            "${KANG}" --section "${SECTION}"
-fi
+    vendor/lib/libmmcamera2_sensor_modules.so)
+        sed -i "s|/system/etc/camera|/vendor/etc/camera|g" "${2}"
+        ;;
 
-if [ "$DEVICE" = "mido" ]; then
-    # Hax for cam configs
-    CAMERA2_SENSOR_MODULES="$LINEAGE_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary/vendor/lib/libmmcamera2_sensor_modules.so
-    sed -i "s|/system/etc/camera/|/vendor/etc/camera/|g" "$CAMERA2_SENSOR_MODULES"
-fi
+    vendor/lib/libmmcamera2_stats_modules.so)
+        sed -i "s|libgui.so|libwui.so|g" "${2}"
+        patchelf --replace-needed "libandroid.so" "libshim_android.so" "${2}"
+        ;;
 
-"$MY_DIR"/setup-makefiles.sh
+    vendor/lib/libmmsw_detail_enhancement.so|vendor/lib/libmmsw_platform.so|vendor/lib64/libmmsw_detail_enhancement.so|vendor/lib64/libmmsw_platform.so)
+        sed -i "s|libgui.so|libwui.so|g" "${2}"
+        ;;
+
+    vendor/lib/libFaceGrade.so|vendor/lib/libarcsoft_beauty_shot.so)
+        patchelf --remove-needed "libandroid.so" "${2}"
+        ;;
+
+    vendor/lib64/libfpservice.so)
+        patchelf --add-needed "libshim_binder.so" "${2}"
+        ;;
+
+    esac
+}
+
+# Initialize the helper
+setup_vendor "${DEVICE}" "${VENDOR}" "${LINEAGE_ROOT}" false "${CLEAN_VENDOR}"
+
+extract "${MY_DIR}/proprietary-files.txt" "${SRC}" \
+        "${KANG}" --section "${SECTION}"
+
+extract "${MY_DIR}/proprietary-files-qc.txt" "${SRC}" \
+        "${KANG}" --section "${SECTION}"
+
+"${MY_DIR}/setup-makefiles.sh"

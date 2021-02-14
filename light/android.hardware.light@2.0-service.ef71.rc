@@ -1,0 +1,28 @@
+on init
+
+# LED_LP5523
+    chmod 0660 /sys/class/leds/lp5523:channel0/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel1/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel2/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel3/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel4/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel5/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel6/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel7/brightness
+    chmod 0660 /sys/class/leds/lp5523:channel8/brightness
+    chown system radio /sys/class/leds/lp5523:channel0/brightness
+    chown system radio /sys/class/leds/lp5523:channel1/brightness
+    chown system radio /sys/class/leds/lp5523:channel2/brightness
+    chown system radio /sys/class/leds/lp5523:channel3/brightness
+    chown system radio /sys/class/leds/lp5523:channel4/brightness
+    chown system radio /sys/class/leds/lp5523:channel5/brightness
+    chown system radio /sys/class/leds/lp5523:channel6/brightness
+    chown system radio /sys/class/leds/lp5523:channel7/brightness
+    chown system radio /sys/class/leds/lp5523:channel8/brightness
+
+service vendor.light-hal-2-0 /vendor/bin/hw/android.hardware.light@2.0-service.ef71
+    interface android.hardware.light@2.0::ILight default
+    class hal
+    user system
+    group system
+    shutdown critical
