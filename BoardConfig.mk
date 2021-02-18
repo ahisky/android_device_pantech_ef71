@@ -117,13 +117,13 @@ QCOM_BT_USE_SMD_TTY                         := true
 QCOM_BT_USE_BTNV := true
 
 # Camera
-USE_DEVICE_SPECIFIC_CAMERA   := true
-BOARD_QTI_CAMERA_32BIT_ONLY  := true
-TARGET_PROCESS_SDK_VERSION_OVERRIDE += \
-    /vendor/bin/mm-qcamera-daemon=23
-TARGET_USES_MEDIA_EXTENSIONS := true
+USE_DEVICE_SPECIFIC_CAMERA := true
+TARGET_TS_MAKEUP := true
 TARGET_USES_QTI_CAMERA_DEVICE := true
-TARGET_TS_MAKEUP             := true
+TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
+TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
+    /system/bin/mediaserver=22 \
+    /system/vendor/bin/mm-qcamera-daemon=22
 
 # Charger
 BOARD_CHARGER_DISABLE_INIT_BLANK := true
