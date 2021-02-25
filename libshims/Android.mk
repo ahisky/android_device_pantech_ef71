@@ -62,3 +62,24 @@ LOCAL_SRC_FILES := \
 LOCAL_MODULE := libshim_cameraclient
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_SHARED_LIBRARIES := libgui_vendor
+LOCAL_MODULE := libwui
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_VENDOR_MODULE := true
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := \
+    android/looper.cpp \
+    android/sensor.cpp
+LOCAL_SHARED_LIBRARIES := libutils
+LOCAL_MODULE := libshim_android
+LOCAL_VENDOR_MODULE := true
+LOCAL_MODULE_TAGS := optional
+LOCAL_32_BIT_ONLY := true
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+include $(BUILD_SHARED_LIBRARY)
+

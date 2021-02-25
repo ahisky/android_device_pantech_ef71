@@ -117,13 +117,13 @@ QCOM_BT_USE_SMD_TTY                         := true
 QCOM_BT_USE_BTNV := true
 
 # Camera
-USE_DEVICE_SPECIFIC_CAMERA := true
-TARGET_TS_MAKEUP := true
-TARGET_USES_QTI_CAMERA_DEVICE := true
-TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
-TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
-    /system/bin/mediaserver=22 \
-    /system/vendor/bin/mm-qcamera-daemon=22
+#USE_DEVICE_SPECIFIC_CAMERA := true
+#TARGET_TS_MAKEUP := true
+#TARGET_USES_QTI_CAMERA_DEVICE := true
+#TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
+#TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
+#    /system/bin/mediaserver=22 \
+#    /system/vendor/bin/mm-qcamera-daemon=22
 
 # Charger
 BOARD_CHARGER_DISABLE_INIT_BLANK := true
@@ -216,11 +216,12 @@ include device/qcom/sepolicy-legacy-um/sepolicy.mk
 BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
 
 # SHIMS
-TARGET_LD_SHIM_LIBS := \
+#TARGET_LD_SHIM_LIBS := \
     /system/vendor/lib/hw/camera.msm8937.so|/system/lib/libshim_camera.so \
     /system/vendor/bin/mm-qcamera-daemon|libshim_pthreadts.so \
     /system/vendor/bin/mm-qcamera-daemon|libshim_mutexdestroy.so \
-    /system/lib/libcamera_client.so|libshim_cameraclient.so
+    /system/lib/libshim_camera.so:/system/lib/libcamera_client.so|libshim_cameraclient.so \
+    /system/vendor/lib/libmmcamera2_stats_modules.so|libshim_android.so
 
 # Treble (Our devices don't use treble)
 PRODUCT_TREBLE_LINKER_NAMESPACES := false
