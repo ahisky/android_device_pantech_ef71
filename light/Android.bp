@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2018 The LineageOS Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,7 @@ cc_binary {
     shared_libs: [
         "libbase",
         "libcutils",
+        "liblog",
         "libhardware",
         "libhidlbase",
         "libhidltransport",
